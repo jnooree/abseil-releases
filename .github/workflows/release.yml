@@ -18,10 +18,7 @@ jobs:
             arch: x86_64
             runs-on: ubuntu-latest
           - os: macosx
-            arch: x86_64
-            runs-on: macos-latest
-          - os: macosx
-            arch: arm64
+            arch: universal2
             runs-on: macos-latest
 
     runs-on: ${{ matrix.runs-on }}
@@ -49,11 +46,7 @@ jobs:
           cmakeVersion: "3.19.7"
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
-        run: |
-          arch -${{ matrix.arch }} \
-            /bin/bash ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
-        env:
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.arch == 'x86_64' && '10.13' || '11.0' }}
+        run: ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
 
       - uses: actions/upload-artifact@v4
         with:
