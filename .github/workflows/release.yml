@@ -1,0 +1,65 @@
+name: Create release
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or tag to release"
+        required: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: jnooree/abseil-cpp
+          ref: ${{ github.event.client_payload.ref || github.event.inputs.ref }}
+
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: "~3.16.0"
+
+      - run: |
+          cmake -DCMAKE_CXX_STANDARD=17 \
+            -DCMAKE_CXX_EXTENSIONS=OFF \
+            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+            -DCMAKE_INSTALL_PREFIX=./install \
+            -S . -B build
+
+      - run: cmake --build build -j
+
+      - run: cmake --install build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: abseil-static
+          path: install/
+
+  release:
+    needs: build
+
+    runs-on: ubuntu-latest
+
+    environment:
+      name: release
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: abseil-static
+
+      - run: tar -czf absl.tar.gz include lib
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: absl.tar.gz
+          repository: jnooree/abseil-cpp
+          tag_name: ${{ github.event.client_payload.ref || github.event.inputs.ref  }}
+          body: "Release ${{ github.event.client_payload.ref || github.event.inputs.ref  }}"
+          prerelease: ${{ contains(github.event.client_payload.ref || github.event.inputs.ref, '.rc') }}
+          token: ${{ secrets.DEPLOY_TOKEN }}
