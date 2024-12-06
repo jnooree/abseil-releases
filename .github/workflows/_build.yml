@@ -1,0 +1,62 @@
+name: Build abseil
+
+on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: true
+    outputs:
+      ref:
+        value: ${{ inputs.ref }}
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: manylinux2014
+            arch: x86_64
+            runs-on: ubuntu-latest
+          - os: macosx
+            arch: universal2
+            runs-on: macos-latest
+
+    runs-on: ${{ matrix.runs-on }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: jnooree/abseil-cpp
+          ref: ${{ inputs.ref }}
+          path: abseil-cpp
+
+      - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
+        run: |
+          sudo docker run --rm -v "$PWD:/work" -w /work \
+            quay.io/pypa/manylinux2014_x86_64:latest \
+            /bin/bash -c "yum install -y ninja-build && \
+              ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}"
+
+      - if: ${{ matrix.runs-on == 'macos-latest' }}
+        uses: lukka/get-cmake@latest
+        with:
+          # Universal binary at least from 3.19.7
+          cmakeVersion: "3.19.7"
+
+      - if: ${{ matrix.runs-on == 'macos-latest' }}
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          # XCode 15.4 fails to build abseil correctly
+          xcode-version: latest-stable
+
+      - if: ${{ matrix.runs-on == 'macos-latest' }}
+        run: ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: libabsl-static-${{ matrix.os }}_${{ matrix.arch }}
+          path: libabsl-static-*.tar.gz

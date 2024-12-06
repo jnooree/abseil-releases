@@ -12,7 +12,8 @@ jobs:
       name: release
 
     steps:
-      - uses: actions/checkout@v4
+      - id: checkout
+        uses: actions/checkout@v4
         with:
           repository: abseil/abseil-cpp
           fetch-depth: 0
@@ -20,3 +21,7 @@ jobs:
       - run: git push --force --mirror 'https://github.com/jnooree/abseil-cpp.git'
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
+
+      - uses: ./.github/workflows/_build.yml
+        with:
+          ref: ${{ steps.checkout.outputs.ref }}
