@@ -1,0 +1,22 @@
+name: Mirror upstream
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: release
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: abseil/abseil-cpp
+          fetch-depth: 0
+
+      - run: git push --force --mirror 'https://github.com/jnooree/abseil-cpp.git'
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
