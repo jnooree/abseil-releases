@@ -12,28 +12,19 @@ jobs:
     environment:
       name: release
 
-    outputs:
-      ref: ${{ steps.checkout.outputs.ref }}
-
     steps:
-      - id: checkout
-        uses: actions/checkout@v4
-        with:
-          repository: abseil/abseil-cpp
-          fetch-depth: 0
-          token: ${{ secrets.DEPLOY_TOKEN }}
-
       - run: |
-          git remote rm origin
-          git remote add --mirror=fetch origin 'https://github.com/abseil/abseil-cpp'
-          git pull --prune --all || true
-          git push --force --all --follow-tags 'https://github.com/jnooree/abseil-cpp'
+          git clone --mirror 'https://github.com/abseil/abseil-cpp' && cd abseil-cpp.git
+          git push --force --no-mirror --all --follow-tags \
+            "https://${GITHUB_TOKEN}@github.com/jnooree/abseil-cpp"
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
   test-build:
     needs: mirror
     uses: ./.github/workflows/_build.yml
     with:
-      ref: ${{ needs.mirror.outputs.ref }}
+      ref: master
 
 concurrency:
   group: mirror-${{ github.workflow }}-${{ github.ref }}
