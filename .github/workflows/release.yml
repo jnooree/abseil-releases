@@ -53,7 +53,7 @@ jobs:
           arch -${{ matrix.arch }} \
             /bin/bash ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
         env:
-          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.arch == 'x86_64' && '10.9' || '11.0' }}
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.arch == 'x86_64' && '10.13' || '11.0' }}
 
       - uses: actions/upload-artifact@v4
         with:
