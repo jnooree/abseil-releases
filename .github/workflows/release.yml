@@ -34,3 +34,7 @@ jobs:
           body: "Release ${{ steps.build.outputs.ref  }}"
           prerelease: ${{ contains(steps.build.outputs.ref, '.rc') }}
           token: ${{ secrets.DEPLOY_TOKEN }}
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.event.client_payload.ref || github.event.inputs.ref }}
+  cancel-in-progress: false

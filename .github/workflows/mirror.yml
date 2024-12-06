@@ -26,3 +26,7 @@ jobs:
       - uses: ./.github/workflows/_build.yml
         with:
           ref: ${{ steps.checkout.outputs.ref }}
+
+concurrency:
+  group: mirror-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
