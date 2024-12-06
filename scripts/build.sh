@@ -13,7 +13,7 @@ cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./install \
 	-S abseil-cpp -B build -G Ninja
 
 cmake --build build -j --target all
-ctest -T build --output-on-failure -j
+ctest --test-dir build -T test --output-on-failure -j
 cmake --install build
 
 tar -cvzf "${output}" -C install .
