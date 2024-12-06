@@ -10,34 +10,53 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: manylinux2014
+            arch: x86_64
+            runs-on: ubuntu-latest
+          - os: macosx
+            arch: x86_64
+            runs-on: macos-latest
+          - os: macosx
+            arch: arm64
+            runs-on: macos-latest
+
+    runs-on: ${{ matrix.runs-on }}
 
     steps:
       - uses: actions/checkout@v4
         with:
           repository: jnooree/abseil-cpp
           ref: ${{ github.event.client_payload.ref || github.event.inputs.ref }}
+          path: abseil-cpp
 
-      - uses: lukka/get-cmake@latest
+      - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
+        run: |
+          sudo docker run --rm -v "$PWD:/work" -w /work \
+            quay.io/pypa/manylinux2014_x86_64:latest \
+            /bin/bash -c "yum install -y ninja-build && \
+              ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}"
+
+      - if: ${{ matrix.runs-on == 'macos-latest' }}
+        uses: lukka/get-cmake@latest
         with:
-          cmakeVersion: "~3.16.0"
+          # Universal binary at least from 3.19.7
+          cmakeVersion: "3.19.7"
 
-      - run: |
-          cmake -DCMAKE_CXX_STANDARD=17 \
-            -DCMAKE_CXX_EXTENSIONS=OFF \
-            -DCMAKE_CXX_STANDARD_REQUIRED=ON \
-            -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-            -DCMAKE_INSTALL_PREFIX=./install \
-            -S . -B build
-
-      - run: cmake --build build -j
-
-      - run: cmake --install build
+      - if: ${{ matrix.runs-on == 'macos-latest' }}
+        run: |
+          arch -${{ matrix.arch }} \
+            /bin/bash ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
+        env:
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.arch == 'x86_64' && '10.9' || '11.0' }}
 
       - uses: actions/upload-artifact@v4
         with:
-          name: abseil-static
-          path: install/
+          name: libabsl-static-${{ matrix.os }}_${{ matrix.arch }}
+          path: libabsl-static-*.tar.gz
 
   release:
     needs: build
@@ -50,14 +69,12 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: abseil-static
-
-      - run: tar -czf absl.tar.gz include lib
+          pattern: libabsl-static-*
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: absl.tar.gz
+          files: libabsl-static-*.tar.gz
           repository: jnooree/abseil-cpp
           tag_name: ${{ github.event.client_payload.ref || github.event.inputs.ref  }}
           body: "Release ${{ github.event.client_payload.ref || github.event.inputs.ref  }}"
