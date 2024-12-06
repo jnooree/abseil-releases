@@ -5,12 +5,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: ./.github/workflows/_build.yml
-        with:
-          ref: master
+    uses: ./.github/workflows/_build.yml
+    with:
+      ref: master
 
 concurrency:
   group: test-${{ github.workflow }}-${{ github.ref }}

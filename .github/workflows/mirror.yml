@@ -12,6 +12,9 @@ jobs:
     environment:
       name: release
 
+    outputs:
+      ref: ${{ steps.checkout.outputs.ref }}
+
     steps:
       - id: checkout
         uses: actions/checkout@v4
@@ -23,9 +26,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
-      - uses: ./.github/workflows/_build.yml
-        with:
-          ref: ${{ steps.checkout.outputs.ref }}
+  test-build:
+    needs: mirror
+    uses: ./.github/workflows/_build.yml
+    with:
+      ref: ${{ needs.mirror.outputs.ref }}
 
 concurrency:
   group: mirror-${{ github.workflow }}-${{ github.ref }}

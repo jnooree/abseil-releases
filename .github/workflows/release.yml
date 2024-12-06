@@ -9,18 +9,19 @@ on:
         required: true
 
 jobs:
+  build:
+    uses: ./.github/workflows/_build.yml
+    with:
+      ref: ${{ github.event.client_payload.ref || github.event.inputs.ref }}
+
   release:
+    needs: build
     runs-on: ubuntu-latest
 
     environment:
       name: release
 
     steps:
-      - id: build
-        uses: ./.github/workflows/_build.yml
-        with:
-          ref: ${{ github.event.client_payload.ref || github.event.inputs.ref }}
-
       - uses: actions/download-artifact@v4
         with:
           pattern: libabsl-static-*
@@ -30,9 +31,9 @@ jobs:
         with:
           files: libabsl-static-*.tar.gz
           repository: jnooree/abseil-cpp
-          tag_name: ${{ steps.build.outputs.ref  }}
-          body: "Release ${{ steps.build.outputs.ref  }}"
-          prerelease: ${{ contains(steps.build.outputs.ref, '.rc') }}
+          tag_name: ${{ needs.build.outputs.ref  }}
+          body: "Release ${{ needs.build.outputs.ref  }}"
+          prerelease: ${{ contains(needs.build.outputs.ref, '.rc') }}
           token: ${{ secrets.DEPLOY_TOKEN }}
 
 concurrency:
