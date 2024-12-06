@@ -21,10 +21,9 @@ jobs:
         with:
           repository: abseil/abseil-cpp
           fetch-depth: 0
+          token: ${{ secrets.DEPLOY_TOKEN }}
 
       - run: git push --force --mirror 'https://github.com/jnooree/abseil-cpp.git'
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
 
   test-build:
     needs: mirror
