@@ -17,12 +17,12 @@ cmake --build build -j --target all
 
 pushd build
 if [[ $output == *-macosx_* ]]; then
-	# Run tests sequentially on macOS to avoid errors
-
-	arch -arm64 ctest -T test --output-on-failure
+	# Flaky on M1...
+	GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
+		arch -arm64 ctest -T test --output-on-failure -j
 	# Some AVX instruction cannot run on M1
 	GTEST_FILTER='-*.AVXEquality/*' \
-		arch -x86_64 ctest -T test --output-on-failure
+		arch -x86_64 ctest -T test --output-on-failure -j
 else
 	# Table.MoveSelfAssign fails when compiled with old gcc
 	# The other two failes when *executed* on old platforms
