@@ -23,7 +23,11 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.DEPLOY_TOKEN }}
 
-      - run: git push --force --mirror 'https://github.com/jnooree/abseil-cpp.git'
+      - run: |
+          git remote rm origin
+          git remote add --mirror=fetch origin 'https://github.com/abseil/abseil-cpp'
+          git pull --prune --all || true
+          git push --force --all --follow-tags 'https://github.com/jnooree/abseil-cpp'
 
   test-build:
     needs: mirror
