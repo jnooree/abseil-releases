@@ -45,7 +45,8 @@ jobs:
         uses: lukka/get-cmake@latest
         with:
           # Universal binary at least from 3.19.7
-          cmakeVersion: "3.19.7"
+          # Automatic ctest parallelism from 3.29
+          cmakeVersion: "~3.29"
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         uses: maxim-lobanov/setup-xcode@v1
