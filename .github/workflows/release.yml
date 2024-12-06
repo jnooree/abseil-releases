@@ -25,11 +25,13 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           pattern: libabsl-static-*
+          merge-multiple: true
 
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
           files: libabsl-static-*.tar.gz
+          fail_on_unmatched_files: true
           repository: jnooree/abseil-cpp
           tag_name: ${{ needs.build.outputs.ref  }}
           body: "Release ${{ needs.build.outputs.ref  }}"
