@@ -15,7 +15,9 @@ jobs:
     steps:
       - run: |
           git clone --mirror 'https://github.com/abseil/abseil-cpp' && cd abseil-cpp.git
-          git push --force --no-mirror --all --follow-tags \
+          git push --force --no-mirror --all \
+            "https://${GITHUB_TOKEN}@github.com/jnooree/abseil-cpp"
+          git push --force --no-mirror --tags \
             "https://${GITHUB_TOKEN}@github.com/jnooree/abseil-cpp"
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_TOKEN }}
