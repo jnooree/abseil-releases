@@ -33,8 +33,10 @@ jobs:
           files: libabsl-static-*.tar.gz
           fail_on_unmatched_files: true
           repository: jnooree/abseil-cpp
-          tag_name: ${{ needs.build.outputs.ref  }}
-          body: "Release ${{ needs.build.outputs.ref  }}"
+          tag_name: ${{ needs.build.outputs.ref }}
+          body: |
+            Release ${{ needs.build.outputs.ref }}.
+            Built with ${{ github.repository }}@${{ needs.build.outputs.build-ref }}.
           prerelease: ${{ contains(needs.build.outputs.ref, '.rc') }}
           token: ${{ secrets.DEPLOY_TOKEN }}
 

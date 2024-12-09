@@ -9,6 +9,8 @@ on:
     outputs:
       ref:
         value: ${{ inputs.ref }}
+      build-ref:
+        value: ${{ jobs.build.outputs.build-ref }}
 
 jobs:
   build:
@@ -23,10 +25,14 @@ jobs:
             arch: universal2
             runs-on: macos-latest
 
+    outputs:
+      build-ref: ${{ steps.self-checkout.outputs.commit }}
+
     runs-on: ${{ matrix.runs-on }}
 
     steps:
-      - uses: actions/checkout@v4
+      - id: self-checkout
+        uses: actions/checkout@v4
 
       - uses: actions/checkout@v4
         with:
