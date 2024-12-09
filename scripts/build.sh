@@ -33,4 +33,8 @@ fi
 popd
 
 cmake --install build
+# pypa build environment installs at lib64
+if [[ ! -d install/lib ]]; then
+	ln -s lib64 install/lib
+fi
 tar -cvzf "${output}" -C install .
