@@ -5,14 +5,34 @@ set -euo pipefail
 output="libabsl-static-${1}.tar.gz"
 set --
 
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=./install \
-	-DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_EXTENSIONS=OFF \
-	-DCMAKE_CXX_STANDARD_REQUIRED=ON -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
-	'-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64' -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13 \
-	-DABSL_PROPAGATE_CXX_STD=ON \
-	-DBUILD_TESTING=ON -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON \
-	-S abseil-cpp -B build -G Ninja
+cmake_configure_args_common=(
+	-DCMAKE_BUILD_TYPE=Release
+	-DCMAKE_INSTALL_PREFIX=./install
+	-DCMAKE_CXX_STANDARD=17
+	-DCMAKE_CXX_EXTENSIONS=OFF
+	-DCMAKE_CXX_STANDARD_REQUIRED=ON
+	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
+	'-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64'
+	-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+	-DABSL_PROPAGATE_CXX_STD=ON
+	-Sabseil-cpp
+	-Bbuild
+	-GNinja
+)
 
+cmake "${cmake_configure_args_common[@]}" \
+	-DBUILD_TESTING=OFF -DABSL_BUILD_TESTING=OFF
+cmake --build build -j --target all
+cmake --install build
+# pypa build environment installs at lib64
+if [[ ! -d install/lib ]]; then
+	ln -s lib64 install/lib
+fi
+tar -cvzf "${output}" -C install .
+
+find build -name CMakeCache.txt -delete
+cmake "${cmake_configure_args_common[@]}" \
+	-DBUILD_TESTING=ON -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON
 cmake --build build -j --target all
 
 pushd build
@@ -31,10 +51,3 @@ else
 		ctest -T test --output-on-failure -j
 fi
 popd
-
-cmake --install build
-# pypa build environment installs at lib64
-if [[ ! -d install/lib ]]; then
-	ln -s lib64 install/lib
-fi
-tar -cvzf "${output}" -C install .
