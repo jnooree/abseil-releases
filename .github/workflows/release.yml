@@ -27,16 +27,10 @@ jobs:
           pattern: libabsl-static-*
           merge-multiple: true
 
-      - uses: robinraju/release-downloader@v1
-        with:
-          repository: abseil/abseil-cpp
-          tag: ${{ needs.build.outputs.ref }}
-          out-file-path: source-archives/
-          fileName: "abseil-cpp-*.tar.gz"
-          extract: true
-
       - run: |
           cd source-archives
+          curl -fL "https://github.com/jnooree/abseil-cpp/archive/refs/tags/${tag}.tar.gz" |
+            tar -xz
           mv "abseil-cpp-$tag" abseil-cpp-latest
           tar -cvzf ../abseil-cpp-latest.tar.gz abseil-cpp-latest
         env:
