@@ -28,7 +28,7 @@ jobs:
           merge-multiple: true
 
       - run: |
-          cd source-archives
+          mkdir source-archives && cd source-archives
           curl -fL "https://github.com/jnooree/abseil-cpp/archive/refs/tags/${tag}.tar.gz" |
             tar -xz
           mv "abseil-cpp-$tag" abseil-cpp-latest
