@@ -27,10 +27,25 @@ jobs:
           pattern: libabsl-static-*
           merge-multiple: true
 
+      - uses: robinraju/release-downloader@v1
+        with:
+          repository: abseil/abseil-cpp
+          tag: ${{ needs.build.outputs.ref }}
+          out-file-path: source-archives/
+          fileName: "abseil-cpp-*.tar.gz"
+          extract: true
+
+      - run: |
+          cd source-archives
+          mv "abseil-cpp-$tag" abseil-cpp-latest
+          tar -cvzf ../abseil-cpp-latest.tar.gz abseil-cpp-latest
+        env:
+          tag: ${{ needs.build.outputs.ref }}
+
       - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: libabsl-static-*.tar.gz
+          files: "*.tar.gz"
           fail_on_unmatched_files: true
           repository: jnooree/abseil-cpp
           tag_name: ${{ needs.build.outputs.ref }}
