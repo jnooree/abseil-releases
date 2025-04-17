@@ -44,8 +44,7 @@ jobs:
         run: |
           sudo docker run --rm -v "$PWD:/work" -w /work \
             quay.io/pypa/manylinux2014_x86_64:latest \
-            /bin/bash -c "yum install -y ninja-build && \
-              ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}"
+            ./scripts/build.sh "${{ matrix.os }}_${{ matrix.arch }}"
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         uses: lukka/get-cmake@latest
