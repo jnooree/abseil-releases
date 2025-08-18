@@ -32,9 +32,9 @@ jobs:
 
     steps:
       - id: self-checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: jnooree/abseil-cpp
           ref: ${{ inputs.ref }}
