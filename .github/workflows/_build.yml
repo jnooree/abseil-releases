@@ -62,7 +62,7 @@ jobs:
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         run: ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: libabsl-static-${{ matrix.os }}_${{ matrix.arch }}
           path: libabsl-static-*.tar.gz
