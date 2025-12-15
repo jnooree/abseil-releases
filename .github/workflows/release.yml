@@ -22,7 +22,7 @@ jobs:
       name: release
 
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           pattern: libabsl-static-*
           merge-multiple: true
