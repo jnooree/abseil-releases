@@ -49,6 +49,9 @@ if [[ $output == *-macosx_* ]]; then
 	GTEST_FILTER='-*.AVXEquality/*' \
 		arch -x86_64 ctest -T test --output-on-failure -j
 else
+	# run absl_check test separately
+	./bin/absl_absl_check_test
+
 	# All discovered in quay.io/pypa/manylinux2014_x86_64:latest container
 	excluded=(
 		# fails when compiled with old gcc
@@ -59,6 +62,6 @@ else
 		'*.HexfloatFloat'
 	)
 	GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
-		ctest -T test --output-on-failure -j
+		ctest -T test --output-on-failure -j -E absl_absl_check_test
 fi
 popd
