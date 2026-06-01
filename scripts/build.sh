@@ -56,7 +56,7 @@ else
 	excluded=(
 		# fails when compiled with old gcc
 		Table.MoveSelfAssign
-		MutatingTest.CopyNWithNegativeN
+		'MutatingTest.*NegativeN'
 		# failes when *executed* on old platforms
 		'*.FixedAndScientificFloat'
 		'*.HexfloatFloat'
