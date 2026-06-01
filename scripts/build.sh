@@ -49,10 +49,16 @@ if [[ $output == *-macosx_* ]]; then
 	GTEST_FILTER='-*.AVXEquality/*' \
 		arch -x86_64 ctest -T test --output-on-failure -j
 else
-	# Table.MoveSelfAssign fails when compiled with old gcc
-	# The other two failes when *executed* on old platforms
-	# (Both discovered in quay.io/pypa/manylinux2014_x86_64:latest container)
-	GTEST_FILTER='-Table.MoveSelfAssign:*.FixedAndScientificFloat:*.HexfloatFloat' \
+	# All discovered in quay.io/pypa/manylinux2014_x86_64:latest container
+	excluded=(
+		# fails when compiled with old gcc
+		Table.MoveSelfAssign
+		MutatingTest.CopyNWithNegativeN
+		# failes when *executed* on old platforms
+		'*.FixedAndScientificFloat'
+		'*.HexfloatFloat'
+	)
+	GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
 		ctest -T test --output-on-failure -j
 fi
 popd
