@@ -40,6 +40,8 @@ jobs:
           ref: ${{ inputs.ref }}
           path: abseil-cpp
 
+      - run: echo "test_common_args=-T test --output-on-failure -j --timeout 300" >>"$GITHUB_ENV"
+
       - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
         run: |
           sudo docker run --rm -v "$PWD:$PWD" -w "$PWD" \
@@ -55,7 +57,7 @@ jobs:
             'MutatingTest.*NegativeN'
           )
           GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
-            ctest -T test --output-on-failure --timeout 300
+            ctest ${test_common_args}
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         uses: lukka/get-cmake@latest
@@ -78,11 +80,11 @@ jobs:
 
           # Flaky on M1
           GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
-            arch -arm64 ctest -T test --output-on-failure -j
+            arch -arm64 ctest ${test_common_args}
 
           # Some AVX instruction cannot run on M1
           GTEST_FILTER='-*.AVXEquality/*' \
-            arch -x86_64 ctest -T test --output-on-failure -j
+            arch -x86_64 ctest ${test_common_args}
 
       - uses: actions/upload-artifact@v7
         with:
