@@ -46,6 +46,16 @@ jobs:
             quay.io/pypa/manylinux2014_x86_64:latest \
             ./scripts/build.sh "${{ matrix.os }}_${{ matrix.arch }}"
 
+          cd build
+
+          excluded=(
+            # fails when compiled with old gcc
+            Table.MoveSelfAssign
+            'MutatingTest.*NegativeN'
+          )
+          GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
+            ctest -T test --output-on-failure --timeout 300
+
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         uses: lukka/get-cmake@latest
         with:
@@ -60,7 +70,18 @@ jobs:
           xcode-version: latest-stable
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
-        run: ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
+        run: |
+          ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
+
+          cd build
+
+          # Flaky on M1
+          GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
+            arch -arm64 ctest -T test --output-on-failure -j
+
+          # Some AVX instruction cannot run on M1
+          GTEST_FILTER='-*.AVXEquality/*' \
+            arch -x86_64 ctest -T test --output-on-failure -j
 
       - uses: actions/upload-artifact@v7
         with:

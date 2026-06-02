@@ -39,26 +39,3 @@ find build -name CMakeCache.txt -delete
 cmake "${cmake_configure_args_common[@]}" \
 	-DBUILD_TESTING=ON -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON
 cmake --build build -j --target all
-
-pushd build
-if [[ $output == *-macosx_* ]]; then
-	# Flaky on M1...
-	GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
-		arch -arm64 ctest -T test --output-on-failure -j
-	# Some AVX instruction cannot run on M1
-	GTEST_FILTER='-*.AVXEquality/*' \
-		arch -x86_64 ctest -T test --output-on-failure -j
-else
-	# All discovered in quay.io/pypa/manylinux2014_x86_64:latest container
-	excluded=(
-		# fails when compiled with old gcc
-		Table.MoveSelfAssign
-		'MutatingTest.*NegativeN'
-		# failes when *executed* on old platforms
-		'*.FixedAndScientificFloat'
-		'*.HexfloatFloat'
-	)
-	GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
-		ctest -T test --output-on-failure
-fi
-popd
