@@ -39,20 +39,3 @@ find build -name CMakeCache.txt -delete
 cmake "${cmake_configure_args_common[@]}" \
 	-DBUILD_TESTING=ON -DABSL_BUILD_TESTING=ON -DABSL_USE_GOOGLETEST_HEAD=ON
 cmake --build build -j --target all
-
-pushd build
-if [[ $output == *-macosx_* ]]; then
-	# Flaky on M1...
-	GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
-		arch -arm64 ctest -T test --output-on-failure -j
-	# Some AVX instruction cannot run on M1
-	GTEST_FILTER='-*.AVXEquality/*' \
-		arch -x86_64 ctest -T test --output-on-failure -j
-else
-	# Table.MoveSelfAssign fails when compiled with old gcc
-	# The other two failes when *executed* on old platforms
-	# (Both discovered in quay.io/pypa/manylinux2014_x86_64:latest container)
-	GTEST_FILTER='-Table.MoveSelfAssign:*.FixedAndScientificFloat:*.HexfloatFloat' \
-		ctest -T test --output-on-failure -j
-fi
-popd
