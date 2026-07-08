@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-output="libabsl-static-${1}.tar.gz"
+output="libabsl-shared-${1}.tar.gz"
 set --
 
 if [[ $output == *linux* ]]; then
@@ -16,6 +16,7 @@ cmake_configure_args_common=(
 	-DCMAKE_CXX_EXTENSIONS=OFF
 	-DCMAKE_CXX_STANDARD_REQUIRED=ON
 	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
+	-DBUILD_SHARED_LIBS=ON
 	'-DCMAKE_OSX_ARCHITECTURES=x86_64;arm64'
 	-DCMAKE_VERBOSE_MAKEFILE=ON
 	-DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
