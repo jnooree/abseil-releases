@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v8
         with:
-          pattern: libabsl-static-*
+          pattern: libabsl-shared-*
           merge-multiple: true
 
       - run: |

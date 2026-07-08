@@ -88,5 +88,5 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: libabsl-static-${{ matrix.os }}_${{ matrix.arch }}
-          path: libabsl-static-*.tar.gz
+          name: libabsl-shared-${{ matrix.os }}_${{ matrix.arch }}
+          path: libabsl-shared-*.tar.gz
