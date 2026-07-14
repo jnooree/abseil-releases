@@ -18,17 +18,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: manylinux2014
-            arch: x86_64
+          - os_arch: manylinux_2_28_x86_64
             runs-on: ubuntu-latest
-          - os: macosx
-            arch: universal2
+          - os_arch: macosx_universal2
             runs-on: macos-latest
 
     outputs:
       build-ref: ${{ steps.self-checkout.outputs.commit }}
 
     runs-on: ${{ matrix.runs-on }}
+
+    env:
+      OS_ARCH: ${{ matrix.os_arch }}
 
     steps:
       - id: self-checkout
@@ -45,8 +46,8 @@ jobs:
       - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
         run: |
           sudo docker run --rm -v "$PWD:$PWD" -w "$PWD" \
-            quay.io/pypa/manylinux2014_x86_64:latest \
-            ./scripts/build.sh "${{ matrix.os }}_${{ matrix.arch }}"
+            "quay.io/pypa/${OS_ARCH}:latest" \
+            ./scripts/build.sh "${OS_ARCH}"
           sudo chown -R "$USER" "$PWD"
 
           cd build
@@ -74,7 +75,7 @@ jobs:
 
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         run: |
-          ./scripts/build.sh ${{ matrix.os }}_${{ matrix.arch }}
+          ./scripts/build.sh "${OS_ARCH}"
 
           cd build
 
@@ -88,5 +89,5 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: libabsl-shared-${{ matrix.os }}_${{ matrix.arch }}
+          name: libabsl-shared-${{ matrix.os_arch }}
           path: libabsl-shared-*.tar.gz
