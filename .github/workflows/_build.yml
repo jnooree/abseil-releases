@@ -41,7 +41,16 @@ jobs:
           ref: ${{ inputs.ref }}
           path: abseil-cpp
 
-      - run: echo "test_common_args=-T test --output-on-failure -j --timeout 300" >>"$GITHUB_ENV"
+      - run: |
+          test_common_args=(
+            --test-dir build
+            -T test
+            --output-on-failure
+            -j
+            --timeout 300
+          )
+
+          echo "test_common_args=${test_common_args[*]}" >>"$GITHUB_ENV"
 
       - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
         run: |
@@ -50,13 +59,6 @@ jobs:
             ./scripts/build.sh "${OS_ARCH}"
           sudo chown -R "$USER" "$PWD"
 
-          cd build
-
-          excluded=(
-            # fails when compiled with old gcc
-            Table.MoveSelfAssign
-            'MutatingTest.*NegativeN'
-          )
           GTEST_FILTER="-$(IFS=:; echo "${excluded[*]}")" \
             ctest ${test_common_args}
 
@@ -76,8 +78,6 @@ jobs:
       - if: ${{ matrix.runs-on == 'macos-latest' }}
         run: |
           ./scripts/build.sh "${OS_ARCH}"
-
-          cd build
 
           # Flaky on M1
           GTEST_FILTER='-CordzInfoStatisticsTest.ThreadSafety' \
