@@ -54,7 +54,9 @@ jobs:
 
       - if: ${{ matrix.runs-on == 'ubuntu-latest' }}
         run: |
+          # See abseil/abseil-cpp#2112 for why need extra -lpthread
           sudo docker run --rm -v "$PWD:$PWD" -w "$PWD" \
+            -e LDFLAGS=-lpthread \
             "quay.io/pypa/${OS_ARCH}:latest" \
             ./scripts/build.sh "${OS_ARCH}"
           sudo chown -R "$USER" "$PWD"
