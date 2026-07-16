@@ -30,7 +30,7 @@ cmake_configure_args_common=(
 cmake "${cmake_configure_args_common[@]}" \
 	-DBUILD_TESTING=OFF -DABSL_BUILD_TESTING=OFF
 cmake --build build -j --target all
-cmake --install build
+cmake --install build --strip
 # pypa build environment installs at lib64
 if [[ ! -d install/lib ]]; then
 	ln -s lib64 install/lib
