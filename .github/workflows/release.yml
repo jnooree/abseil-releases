@@ -2,6 +2,8 @@ name: Create release
 
 on:
   repository_dispatch:
+    types: [release-tag]
+
   workflow_dispatch:
     inputs:
       ref:
