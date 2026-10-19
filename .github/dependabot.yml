@@ -9,3 +9,12 @@ updates:
     groups:
       ci-deps:
         patterns: ["*"]
+  - package-ecosystem: "npm"
+    directory: "/worker"
+    schedule:
+      interval: "weekly"
+      time: "10:00"
+      timezone: "Asia/Seoul"
+    groups:
+      worker-deps:
+        patterns: ["*"]
